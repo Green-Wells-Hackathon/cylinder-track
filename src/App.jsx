@@ -11,8 +11,8 @@ function App() {
     path:"/",
     Component: lazy(() => import('./Pages/Layout')),
     children: [
-      // {index: true, Component: lazy(() => import('./Pages/Home'))},
-      {
+      {index: true, Component: lazy(() => import('./pages/Login'))},
+       {
         path: 'dashboard', 
         Component: lazy(() => import('./pages/admin/Layout')),
         children: [
