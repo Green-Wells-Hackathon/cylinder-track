@@ -13,6 +13,7 @@ function App() {
     children: [
       {index: true, Component: lazy(() => import('./pages/Login'))},
       {path: 'dashboard', Component: lazy(() => import('./pages/customer/Home'))},
+      {path: 'checkout', Component: lazy(() => import('./pages/customer/Checkout'))},
     ],
   }
 ])
