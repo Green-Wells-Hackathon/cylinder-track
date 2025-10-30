@@ -9,7 +9,7 @@ function App() {
   const router = createBrowserRouter([
   {
     path:"/",
-    Component: lazy(() => import('./Pages/Layout')),
+    Component: lazy(() => import('./pages/Layout')),
     children: [
       {index: true, Component: lazy(() => import('./pages/Login'))},
        {
