@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { collection, addDoc, updateDoc, doc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../../firebase';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -11,29 +13,29 @@ const Checkout = () => {
   const [order, setOrder] = useState(null);
   const [cart, setCart] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [orderId, setOrderId] = useState(null);
+  const [realTimeUpdates, setRealTimeUpdates] = useState(null);
   const [userInfo, setUserInfo] = useState({
     name: '',
     phone: '',
     address: '',
-    additionalNotes: ''
+    additionalNotes: '',
+    email: ''
   });
 
   // Load cart from location state or localStorage
   useEffect(() => {
     const loadCart = () => {
-      // First try to get cart from location state (more reliable)
       if (location.state?.cart) {
         const stateCart = location.state.cart;
         setCart(Array.isArray(stateCart) ? stateCart : []);
         setIsLoading(false);
-        
         if (stateCart.length === 0) {
           setTimeout(() => navigate('/dashboard'), 100);
         }
         return;
       }
 
-      // Fallback to localStorage
       const savedCart = localStorage.getItem('greenWellsCart');
       if (savedCart) {
         try {
@@ -41,7 +43,6 @@ const Checkout = () => {
           const validCart = Array.isArray(parsedCart) ? parsedCart : [];
           setCart(validCart);
           setIsLoading(false);
-          
           if (validCart.length === 0) {
             setTimeout(() => navigate('/dashboard'), 100);
           }
@@ -58,24 +59,40 @@ const Checkout = () => {
       }
     };
 
-    // Add a small delay to ensure everything is loaded
     const timer = setTimeout(loadCart, 50);
     return () => clearTimeout(timer);
   }, [navigate, location.state]);
 
-  // Initialize order when cart is loaded
+  // Real-time order updates from Firestore
   useEffect(() => {
-    if (!isLoading && cart.length > 0) {
-      const newOrder = {
-        id: `GW${Date.now()}`,
-        items: cart,
-        total: cart.reduce((sum, item) => sum + (item.price || 0), 0),
-        timestamp: new Date(),
-        status: 'pending'
-      };
-      setOrder(newOrder);
-    }
-  }, [isLoading, cart]);
+    if (!orderId) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'orders', orderId), (doc) => {
+      if (doc.exists()) {
+        const orderData = doc.data();
+        setRealTimeUpdates(orderData);
+        setOrderStatus(orderData.status[orderData.status.length - 1]);
+        
+        if (orderData.driver_name) {
+          setDriverInfo({
+            name: orderData.driver_name,
+            phone: orderData.driver_phone || '+254 700 000000',
+            vehicle: orderData.driver_vehicle || 'Delivery Vehicle',
+            rating: orderData.driver_rating || '4.8',
+            eta: orderData.eta || '15-25 mins',
+            photo: orderData.driver_photo || '👨🏾‍💼'
+          });
+        }
+
+        // Auto-advance steps based on status
+        if (orderData.status.includes('assigned') && step < 4) {
+          setStep(4);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [orderId, step]);
 
   // Request location access
   const requestLocation = () => {
@@ -84,18 +101,18 @@ const Checkout = () => {
       return;
     }
 
-    setStep(2); // Show loading state
+    setStep(2);
     
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setUserLocation({ latitude, longitude });
-        setStep(3); // Move to user info form
+        setStep(3);
         reverseGeocode(latitude, longitude);
       },
       (error) => {
         console.error('Error getting location:', error);
-        setStep(3); // Still move to form but without auto-filled address
+        setStep(3);
         alert('Unable to get your location. Please enter your address manually.');
       },
       {
@@ -131,6 +148,26 @@ const Checkout = () => {
     });
   };
 
+  // Create order in Firestore
+  const createOrderInFirestore = async (orderData) => {
+    try {
+      const docRef = await addDoc(collection(db, 'orders'), orderData);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw error;
+    }
+  };
+
+  // Update order in Firestore
+  const updateOrderInFirestore = async (orderId, updates) => {
+    try {
+      await updateDoc(doc(db, 'orders', orderId), updates);
+    } catch (error) {
+      console.error('Error updating order:', error);
+    }
+  };
+
   // Submit order
   const submitOrder = async (e) => {
     e.preventDefault();
@@ -140,18 +177,83 @@ const Checkout = () => {
       return;
     }
 
-    setStep(4); // Move to order confirmation
-    setOrderStatus('confirmed');
+    setStep(4);
+    setOrderStatus('pending');
 
-    // Simulate order processing
-    setTimeout(() => {
-      setOrderStatus('preparing');
-      simulateDriverAssignment();
-    }, 3000);
+    // Prepare order data for Firestore
+    const orderData = {
+      amount: cart.reduce((total, item) => total + (item.price || 0), 0),
+      status: ['pending'],
+      customer_name: userInfo.name,
+      customer_phone: userInfo.phone,
+      customer_email: userInfo.email,
+      customer_address: userInfo.address,
+      additional_notes: userInfo.additionalNotes,
+      cylinder_ids: cart.map(item => item.id),
+      cylinders: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        weight: item.weight,
+        price: item.price
+      })),
+      destination_location: userLocation ? 
+        new firebase.firestore.GeoPoint(userLocation.latitude, userLocation.longitude) : 
+        null,
+      driver_name: "",
+      driver_phone: "",
+      driver_vehicle: "",
+      driver_rating: "",
+      order_completed: false,
+      start_time: new Date(),
+      estimated_delivery_time: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+      payment_status: 'pending',
+      payment_method: 'mpesa',
+      order_notes: userInfo.additionalNotes,
+      created_at: new Date(),
+      updated_at: new Date()
+    };
+
+    try {
+      // Create order in Firestore
+      const newOrderId = await createOrderInFirestore(orderData);
+      setOrderId(newOrderId);
+      
+      const newOrder = {
+        id: newOrderId,
+        items: cart,
+        total: orderData.amount,
+        timestamp: new Date(),
+        status: 'pending'
+      };
+      setOrder(newOrder);
+
+      // Simulate order processing with Firestore updates
+      setTimeout(async () => {
+        await updateOrderInFirestore(newOrderId, {
+          status: ['pending', 'confirmed'],
+          updated_at: new Date()
+        });
+        setOrderStatus('confirmed');
+      }, 2000);
+
+      setTimeout(async () => {
+        await updateOrderInFirestore(newOrderId, {
+          status: ['pending', 'confirmed', 'preparing'],
+          updated_at: new Date()
+        });
+        setOrderStatus('preparing');
+        simulateDriverAssignment(newOrderId);
+      }, 5000);
+
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      alert('Failed to create order. Please try again.');
+      setStep(3);
+    }
   };
 
-  // Simulate driver assignment
-  const simulateDriverAssignment = () => {
+  // Simulate driver assignment with Firestore update
+  const simulateDriverAssignment = async (orderId) => {
     const drivers = [
       { 
         id: 1, 
@@ -170,36 +272,47 @@ const Checkout = () => {
         rating: '4.9',
         eta: '20-30 mins',
         photo: '👩🏾‍💼'
-      },
-      { 
-        id: 3, 
-        name: 'David Ochieng', 
-        phone: '+254 734 567 890', 
-        vehicle: 'Motorcycle KMN 789C',
-        rating: '4.7',
-        eta: '10-15 mins',
-        photo: '👨🏾‍💼'
       }
     ];
 
     const assignedDriver = drivers[Math.floor(Math.random() * drivers.length)];
-    setDriverInfo(assignedDriver);
     
-    setTimeout(() => {
-      setOrderStatus('assigned');
+    await updateOrderInFirestore(orderId, {
+      status: ['pending', 'confirmed', 'preparing', 'assigned'],
+      driver_name: assignedDriver.name,
+      driver_phone: assignedDriver.phone,
+      driver_vehicle: assignedDriver.vehicle,
+      driver_rating: assignedDriver.rating,
+      eta: assignedDriver.eta,
+      assigned_at: new Date(),
+      updated_at: new Date()
+    });
+
+    setDriverInfo(assignedDriver);
+    setOrderStatus('assigned');
+    
+    // Simulate pickup
+    setTimeout(async () => {
+      await updateOrderInFirestore(orderId, {
+        status: ['pending', 'confirmed', 'preparing', 'assigned', 'picked_up'],
+        picked_up_at: new Date(),
+        updated_at: new Date()
+      });
+      setOrderStatus('picked_up');
       
-      // Simulate pickup
-      setTimeout(() => {
-        setOrderStatus('picked_up');
-        
-        // Simulate delivery
-        setTimeout(() => {
-          setOrderStatus('delivered');
-          // Clear cart from localStorage when order is delivered
-          localStorage.removeItem('greenWellsCart');
-        }, 15000);
-      }, 10000);
-    }, 2000);
+      // Simulate delivery
+      setTimeout(async () => {
+        await updateOrderInFirestore(orderId, {
+          status: ['pending', 'confirmed', 'preparing', 'assigned', 'picked_up', 'delivered'],
+          order_completed: true,
+          end_time: new Date(),
+          delivered_at: new Date(),
+          updated_at: new Date()
+        });
+        setOrderStatus('delivered');
+        localStorage.removeItem('greenWellsCart');
+      }, 15000);
+    }, 10000);
   };
 
   const formatPrice = (price) => {
@@ -225,7 +338,7 @@ const Checkout = () => {
   const cartLength = cart ? cart.length : 0;
   const cartItems = cart || [];
 
-  if (cartLength === 0) {
+  if (cartLength === 0 && step < 4) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
         <div className="text-center">
@@ -264,7 +377,7 @@ const Checkout = () => {
               </h1>
               <p className="text-sm text-gray-600">Checkout & Tracking</p>
             </div>
-            <div className="w-20"></div> {/* Spacer for balance */}
+            <div className="w-20"></div>
           </div>
         </div>
       </header>
@@ -422,6 +535,20 @@ const Checkout = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={userInfo.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2F9E44] focus:border-transparent"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Delivery Address *
                   </label>
                   <textarea
@@ -467,7 +594,7 @@ const Checkout = () => {
             <div className="bg-gradient-to-r from-[#2F9E44] to-[#1E7E34] text-white p-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-bold mb-2">Order #{order?.id}</h2>
+                  <h2 className="text-2xl font-bold mb-2">Order #{orderId}</h2>
                   <p className="opacity-90">Placed on {order?.timestamp?.toLocaleDateString('en-KE', {
                     weekday: 'long',
                     year: 'numeric',
@@ -476,6 +603,11 @@ const Checkout = () => {
                     hour: '2-digit',
                     minute: '2-digit'
                   })}</p>
+                  {realTimeUpdates && (
+                    <div className="mt-2 text-sm">
+                      <div>Last updated: {realTimeUpdates.updated_at?.toDate()?.toLocaleTimeString()}</div>
+                    </div>
+                  )}
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold">{formatPrice(order?.total || 0)}</div>
@@ -484,16 +616,29 @@ const Checkout = () => {
               </div>
             </div>
 
+            {/* Real-time Status Badge */}
+            {realTimeUpdates && (
+              <div className="bg-blue-50 border-b border-blue-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-blue-800">Live Updates Active</span>
+                  </div>
+                  <span className="text-xs text-blue-600">Connected to Firestore</span>
+                </div>
+              </div>
+            )}
+
             {/* Tracking Visualization */}
             <div className="p-6">
               <div className="max-w-2xl mx-auto">
                 {/* Tracking Steps */}
                 <div className="relative">
-                  {/* Connection Line */}
                   <div className="absolute left-8 top-0 h-full w-1 bg-gray-200 -z-10"></div>
                   
                   {[
-                    { status: 'confirmed', icon: '✅', title: 'Order Confirmed', description: 'We have received your order' },
+                    { status: 'pending', icon: '📝', title: 'Order Received', description: 'We have received your order' },
+                    { status: 'confirmed', icon: '✅', title: 'Order Confirmed', description: 'Payment verified and order confirmed' },
                     { status: 'preparing', icon: '📦', title: 'Preparing Order', description: 'Quality checking your cylinder' },
                     { status: 'assigned', icon: '👨🏾‍💼', title: 'Driver Assigned', description: 'Delivery partner on the way' },
                     { status: 'picked_up', icon: '🚚', title: 'Picked Up', description: 'Order collected from station' },
@@ -519,6 +664,13 @@ const Checkout = () => {
                           {stepItem.description}
                         </p>
                         
+                        {/* Show timestamps from Firestore */}
+                        {realTimeUpdates && getStatusTimestamp(realTimeUpdates, stepItem.status) && (
+                          <p className="text-xs text-green-600 mt-1">
+                            {getStatusTimestamp(realTimeUpdates, stepItem.status)}
+                          </p>
+                        )}
+                        
                         {/* Driver Info */}
                         {stepItem.status === 'assigned' && driverInfo && getStatusIndex(orderStatus) >= index && (
                           <div className="mt-3 p-4 bg-green-50 rounded-lg border border-green-200">
@@ -529,6 +681,11 @@ const Checkout = () => {
                                 <p className="text-sm text-gray-600">Vehicle: {driverInfo.vehicle}</p>
                                 <p className="text-sm text-gray-600">Rating: {driverInfo.rating} ⭐</p>
                                 <p className="text-sm text-green-600 font-semibold">ETA: {driverInfo.eta}</p>
+                                {realTimeUpdates?.assigned_at && (
+                                  <p className="text-xs text-gray-500">
+                                    Assigned: {realTimeUpdates.assigned_at.toDate().toLocaleTimeString()}
+                                  </p>
+                                )}
                               </div>
                               <a 
                                 href={`tel:${driverInfo.phone}`}
@@ -557,13 +714,11 @@ const Checkout = () => {
                         <div className="text-sm font-semibold text-[#2F9E44]">{driverInfo.eta}</div>
                       </div>
                       <div className="h-32 bg-gradient-to-r from-green-100 to-green-200 rounded relative">
-                        {/* Animated driver marker */}
                         <div className="absolute top-1/2 left-0 transform -translate-y-1/2 animate-pulse">
                           <div className="bg-[#2F9E44] text-white p-2 rounded-full shadow-lg">
                             🚗
                           </div>
                         </div>
-                        {/* Destination marker */}
                         <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
                           <div className="bg-red-500 text-white p-2 rounded-full">
                             📍
@@ -580,6 +735,11 @@ const Checkout = () => {
                     <div className="text-6xl mb-4 animate-bounce">🎉</div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">Order Delivered Successfully!</h3>
                     <p className="text-gray-600 mb-6">Your Green Wells gas cylinder has been delivered safely.</p>
+                    {realTimeUpdates?.delivered_at && (
+                      <p className="text-sm text-gray-500 mb-4">
+                        Delivered at: {realTimeUpdates.delivered_at.toDate().toLocaleString()}
+                      </p>
+                    )}
                     <div className="flex space-x-4 justify-center">
                       <button 
                         onClick={() => navigate('/dashboard')}
@@ -604,8 +764,26 @@ const Checkout = () => {
 
 // Helper function to get status index for tracking
 const getStatusIndex = (status) => {
-  const statusOrder = ['confirmed', 'preparing', 'assigned', 'picked_up', 'delivered'];
+  const statusOrder = ['pending', 'confirmed', 'preparing', 'assigned', 'picked_up', 'delivered'];
   return statusOrder.indexOf(status);
+};
+
+// Helper function to get status timestamps
+const getStatusTimestamp = (orderData, status) => {
+  const timestamps = {
+    'pending': orderData.start_time,
+    'confirmed': orderData.confirmed_at,
+    'preparing': orderData.preparing_at,
+    'assigned': orderData.assigned_at,
+    'picked_up': orderData.picked_up_at,
+    'delivered': orderData.delivered_at
+  };
+
+  const timestamp = timestamps[status];
+  if (timestamp) {
+    return timestamp.toDate().toLocaleTimeString();
+  }
+  return null;
 };
 
 export default Checkout;
