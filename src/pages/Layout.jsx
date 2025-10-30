@@ -5,7 +5,6 @@ function Layout() {
   return (
     <section>
         {/* nav */}
-        <Nav/>
         <section>
             <Outlet />
         </section>
