@@ -11,7 +11,15 @@ function App() {
     path:"/",
     Component: lazy(() => import('./Pages/Layout')),
     children: [
-      {index: true, Component: lazy(() => import('./Pages/Home'))},
+      // {index: true, Component: lazy(() => import('./Pages/Home'))},
+      {
+        path: 'dashboard', 
+        Component: lazy(() => import('./pages/admin/Layout')),
+        children: [
+          {index: true, Component: lazy(() => import('./pages/admin/Dashboard'))},
+          {path: 'orders', Component: lazy(() => import('./pages/admin/Orders'))},
+        ]
+      },
     ],
   }
 ])
