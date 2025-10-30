@@ -58,15 +58,15 @@ function Login() {
         });
 
         setMessage("Account created successfully!");
-        navigate("/dashboard"); // Redirect after signup
+        navigate("/home"); // Redirect after signup
       } else {
         // Login
         await signInWithEmailAndPassword(auth, email, password);
 
         // Redirect based on role
-        if (activeRole === "customer") navigate("/dashboard");
+        if (activeRole === "customer") navigate("/home");
         else if (activeRole === "driver") navigate("/driver");
-        else if (activeRole === "admin") navigate("/admin");
+        else if (activeRole === "admin") navigate("/dashboard");
       }
     } catch (error) {
       setMessage(error.message);
