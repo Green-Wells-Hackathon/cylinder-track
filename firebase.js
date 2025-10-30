@@ -6,13 +6,13 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBn9xJKLtl_Bh-_ARpCdSQxjwKCHl601N4",
-  authDomain: "smart-track-3a146.firebaseapp.com",
-  projectId: "smart-track-3a146",
-  storageBucket: "smart-track-3a146.firebasestorage.app",
-  messagingSenderId: "752368569955",
-  appId: "1:752368569955:web:71eb659b47595a6bb53256",
-  measurementId: "G-BBKZLZFC90"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
