@@ -34,7 +34,7 @@ function App() {
 
         { 
           path: '*', 
-          Component: lazy(() => import('./pages/NotFoundPage')) 
+          Component: lazy(() => import('./components/NotFoundPage')) 
         },
 
       ],
