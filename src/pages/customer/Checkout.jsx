@@ -31,7 +31,7 @@ const Checkout = () => {
         setCart(Array.isArray(stateCart) ? stateCart : []);
         setIsLoading(false);
         if (stateCart.length === 0) {
-          setTimeout(() => navigate('/dashboard'), 100);
+          setTimeout(() => navigate('/home'), 100);
         }
         return;
       }
@@ -44,18 +44,18 @@ const Checkout = () => {
           setCart(validCart);
           setIsLoading(false);
           if (validCart.length === 0) {
-            setTimeout(() => navigate('/dashboard'), 100);
+            setTimeout(() => navigate('/home'), 100);
           }
         } catch (error) {
           console.error('Error parsing cart from localStorage:', error);
           setCart([]);
           setIsLoading(false);
-          setTimeout(() => navigate('/dashboard'), 100);
+          setTimeout(() => navigate('/home'), 100);
         }
       } else {
         setCart([]);
         setIsLoading(false);
-        setTimeout(() => navigate('/dashboard'), 100);
+        setTimeout(() => navigate('/home'), 100);
       }
     };
 
@@ -346,7 +346,7 @@ const Checkout = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-4">Add some gas cylinders to proceed with checkout</p>
           <button 
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/home')}
             className="bg-[#2F9E44] text-white px-6 py-3 rounded-lg hover:bg-[#1E7E34] transition-colors"
           >
             Continue Shopping
@@ -365,7 +365,7 @@ const Checkout = () => {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/home')}
               className="flex items-center space-x-2 text-[#2F9E44] hover:text-[#1E7E34]"
             >
               <span>←</span>
@@ -742,7 +742,7 @@ const Checkout = () => {
                     )}
                     <div className="flex space-x-4 justify-center">
                       <button 
-                        onClick={() => navigate('/dashboard')}
+                        onClick={() => navigate('/home')}
                         className="bg-[#2F9E44] text-white px-6 py-3 rounded-lg hover:bg-[#1E7E34] transition-colors"
                       >
                         Order Again

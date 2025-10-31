@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Import all images
+import cylinder3kg from '../../assets/3kg.png';
+import cylinder4kg from '../../assets/4kg.png';
+import cylinder5kg from '../../assets/5kg.png';
+import cylinder6kg from '../../assets/6kg.png';
+import cylinder7kg from '../../assets/7kg.png';
+import cylinder10kg from '../../assets/10kg.png';
+import cylinder12kg from '../../assets/12kg.png';
+import cylinder12_5kg from '../../assets/12.5kg.png';
+import cylinder15kg from '../../assets/15kg.png';
+
+// Fallback images for any missing imports
+const fallbackImages = {
+  cylinder: '⛽',
+  package: '📦',
+  emergency: '🚨'
+};
+
 const Home = () => {
   const navigate = useNavigate();
   
@@ -22,181 +40,136 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [cartAnimation, setCartAnimation] = useState(null);
+  const [imageErrors, setImageErrors] = useState({});
 
   // Green Wells Kenya Products Data
   useEffect(() => {
     const greenWellsProducts = [
-  {
-    id: 1,
-    name: '3kg Gas Cylinder Refill',
-    weight: '3kg',
-    price: 1200,
-    delivery: 'Same Day Delivery',
-    popular: false,
-    image: '/assets/3kg-cylinder.png',
-    description: 'Compact size perfect for students, small apartments, and occasional cooking',
-    features: ['Lasts 1-2 weeks', 'Lightweight & portable', 'Ideal for single users'],
-    deliveryAreas: ['Nairobi', 'Thika', 'Kiambu']
-  },
-  {
-    id: 2,
-    name: '4kg Gas Cylinder Refill',
-    weight: '4kg',
-    price: 1450,
-    delivery: 'Same Day Delivery',
-    popular: false,
-    image: '/assets/4kg-cylinder.png',
-    description: 'Great for small families or backup cooking solution',
-    features: ['Lasts 2-3 weeks', 'Easy to handle', 'Budget-friendly option'],
-    deliveryAreas: ['Nairobi', 'Thika', 'Kiambu']
-  },
-  {
-    id: 3,
-    name: '5kg Gas Cylinder Refill',
-    weight: '5kg',
-    price: 1650,
-    delivery: 'Same Day Delivery',
-    popular: true,
-    image: '/assets/5kg-cylinder.png',
-    description: 'Versatile size for small to medium households',
-    features: ['Lasts 3-4 weeks', 'Balanced size & capacity', 'Most versatile choice'],
-    deliveryAreas: ['Nairobi', 'Thika', 'Kiambu', 'Nakuru']
-  },
-  {
-    id: 4,
-    name: '6kg Gas Cylinder Refill',
-    weight: '6kg',
-    price: 1850,
-    delivery: 'Same Day Delivery',
-    popular: true,
-    image: '/assets/6kg-cylinder.png',
-    description: 'Ideal for small families and efficient cooking needs',
-    features: ['Lasts 4-5 weeks', 'Family-friendly size', 'Easy to transport'],
-    deliveryAreas: ['Nairobi', 'Thika', 'Kiambu', 'Nakuru']
-  },
-  {
-    id: 5,
-    name: '7kg Gas Cylinder Refill',
-    weight: '7kg',
-    price: 2100,
-    delivery: 'Same Day Delivery',
-    popular: false,
-    image: '/assets/7kg-cylinder.png',
-    description: 'Extended capacity for growing families',
-    features: ['Lasts 5-6 weeks', 'Extra cooking time', 'Reliable supply'],
-    deliveryAreas: ['Nairobi', 'Thika', 'Kiambu', 'Nakuru']
-  },
-  {
-    id: 6,
-    name: '10kg Gas Cylinder Refill',
-    weight: '10kg',
-    price: 2850,
-    delivery: 'Same Day Delivery',
-    popular: true,
-    image: '/assets/10kg-cylinder.png',
-    description: 'Perfect balance of capacity and affordability for families',
-    features: ['Lasts 6-8 weeks', 'Cost-effective', 'Family favorite'],
-    deliveryAreas: ['Nairobi', 'Nakuru', 'Mombasa', 'Kisumu']
-  },
-  {
-    id: 7,
-    name: '12kg Gas Cylinder Refill',
-    weight: '12kg',
-    price: 3250,
-    delivery: 'Same Day Delivery',
-    popular: false,
-    image: '/assets/12kg-cylinder.png',
-    description: 'Extended family size with reliable long-term supply',
-    features: ['Lasts 8-10 weeks', 'Reduced refill frequency', 'Great value'],
-    deliveryAreas: ['Nairobi', 'Nakuru', 'Mombasa', 'Kisumu']
-  },
-  {
-    id: 8,
-    name: '12.5kg Gas Cylinder Refill',
-    weight: '12.5kg',
-    price: 3350,
-    delivery: 'Same Day Delivery',
-    popular: true,
-    image: '/assets/12.5kg-cylinder.png',
-    description: 'Standard family size trusted by Kenyan households',
-    features: ['Lasts 8-10 weeks', 'Most popular family size', 'Trusted quality'],
-    deliveryAreas: ['Nairobi', 'Nakuru', 'Mombasa', 'Kisumu', 'All major towns']
-  },
-  {
-    id: 9,
-    name: '15kg Gas Cylinder Refill',
-    weight: '15kg',
-    price: 3950,
-    delivery: 'Next Day Delivery',
-    popular: false,
-    image: '/assets/15kg-cylinder.png',
-    description: 'Large capacity for big families and small businesses',
-    features: ['Lasts 10-12 weeks', 'Commercial grade', 'Extended usage'],
-    deliveryAreas: ['Nairobi', 'All major towns']
-  },
-  {
-    id: 10,
-    name: '22.5kg Gas Cylinder Refill',
-    weight: '22.5kg',
-    price: 5650,
-    delivery: 'Next Day Delivery',
-    popular: false,
-    image: '/assets/22.5kg-cylinder.png',
-    description: 'Commercial size for restaurants and large establishments',
-    features: ['Lasts 3-4 months', 'Business solution', 'Bulk savings'],
-    deliveryAreas: ['Nairobi', 'All major towns']
-  },
-  {
-    id: 11,
-    name: '50kg Gas Cylinder Refill',
-    weight: '50kg',
-    price: 11200,
-    delivery: '2-3 Days Delivery',
-    popular: false,
-    image: '/assets/50kg-cylinder.png',
-    description: 'Industrial grade for factories and large institutions',
-    features: ['Lasts 4-6 months', 'Industrial strength', 'Maximum capacity'],
-    deliveryAreas: ['Nationwide']
-  },
-  {
-    id: 12,
-    name: 'Starter Package (6kg + Cooker)',
-    weight: '6kg + Stove',
-    price: 6500,
-    delivery: 'Next Day Delivery',
-    popular: true,
-    image: '/assets/starter-package.png',
-    description: 'Complete cooking setup perfect for new households',
-    features: ['2-burner stove', 'Everything included', 'Free installation'],
-    deliveryAreas: ['Nairobi', 'Mombasa', 'Kisumu']
-  },
-  {
-    id: 13,
-    name: 'Family Package (13kg + Cooker)',
-    weight: '13kg + Stove',
-    price: 8900,
-    delivery: 'Next Day Delivery',
-    popular: true,
-    image: '/assets/family-package.png',
-    description: 'Complete family cooking solution with premium stove',
-    features: ['3-burner stove', 'Family-sized cylinder', 'Professional installation'],
-    deliveryAreas: ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru']
-  },
-  {
-    id: 14,
-    name: 'Emergency 3kg Refill',
-    weight: '3kg',
-    price: 950,
-    delivery: 'Express Delivery (2-4 hours)',
-    popular: false,
-    image: '/assets/emergency-refill.png',
-    description: 'Quick emergency solution when you run out of gas',
-    features: ['2-4 hour delivery', 'Emergency service', 'Life-saver backup'],
-    deliveryAreas: ['Nairobi CBD', 'Westlands', 'Karen', 'Thika Town']
-  }
-];
+      {
+        id: 1,
+        name: '3kg Gas Cylinder Refill',
+        weight: '3kg',
+        price: 600,
+        delivery: 'Same Day Delivery',
+        popular: false,
+        image: cylinder3kg,
+        description: 'Compact size perfect for students, small apartments, and occasional cooking',
+        features: ['Lasts 1-2 weeks', 'Lightweight & portable', 'Ideal for single users'],
+        deliveryAreas: ['Nairobi', 'Thika', 'Kiambu']
+      },
+      {
+        id: 2,
+        name: '4kg Gas Cylinder Refill',
+        weight: '4kg',
+        price: 850,
+        delivery: 'Same Day Delivery',
+        popular: false,
+        image: cylinder4kg,
+        description: 'Great for small families or backup cooking solution',
+        features: ['Lasts 2-3 weeks', 'Easy to handle', 'Budget-friendly option'],
+        deliveryAreas: ['Nairobi', 'Thika', 'Kiambu']
+      },
+      {
+        id: 3,
+        name: '5kg Gas Cylinder Refill',
+        weight: '5kg',
+        price: 1000,
+        delivery: 'Same Day Delivery',
+        popular: true,
+        image: cylinder5kg,
+        description: 'Versatile size for small to medium households',
+        features: ['Lasts 3-4 weeks', 'Balanced size & capacity', 'Most versatile choice'],
+        deliveryAreas: ['Nairobi', 'Thika', 'Kiambu', 'Nakuru']
+      },
+      {
+        id: 4,
+        name: '6kg Gas Cylinder Refill',
+        weight: '6kg',
+        price: 1150,
+        delivery: 'Same Day Delivery',
+        popular: true,
+        image: cylinder6kg,
+        description: 'Ideal for small families and efficient cooking needs',
+        features: ['Lasts 4-5 weeks', 'Family-friendly size', 'Easy to transport'],
+        deliveryAreas: ['Nairobi', 'Thika', 'Kiambu', 'Nakuru']
+      },
+      {
+        id: 5,
+        name: '7kg Gas Cylinder Refill',
+        weight: '7kg',
+        price: 1300,
+        delivery: 'Same Day Delivery',
+        popular: false,
+        image: cylinder7kg,
+        description: 'Extended capacity for growing families',
+        features: ['Lasts 5-6 weeks', 'Extra cooking time', 'Reliable supply'],
+        deliveryAreas: ['Nairobi', 'Thika', 'Kiambu', 'Nakuru']
+      },
+      {
+        id: 6,
+        name: '10kg Gas Cylinder Refill',
+        weight: '10kg',
+        price: 1800,
+        delivery: 'Same Day Delivery',
+        popular: true,
+        image: cylinder10kg,
+        description: 'Perfect balance of capacity and affordability for families',
+        features: ['Lasts 6-8 weeks', 'Cost-effective', 'Family favorite'],
+        deliveryAreas: ['Nairobi', 'Nakuru', 'Mombasa', 'Kisumu']
+      },
+      {
+        id: 7,
+        name: '12kg Gas Cylinder Refill',
+        weight: '12kg',
+        price: 2000,
+        delivery: 'Same Day Delivery',
+        popular: false,
+        image: cylinder12kg,
+        description: 'Extended family size with reliable long-term supply',
+        features: ['Lasts 8-10 weeks', 'Reduced refill frequency', 'Great value'],
+        deliveryAreas: ['Nairobi', 'Nakuru', 'Mombasa', 'Kisumu']
+      },
+      {
+        id: 8,
+        name: '12.5kg Gas Cylinder Refill',
+        weight: '12.5kg',
+        price: 2050,
+        delivery: 'Same Day Delivery',
+        popular: true,
+        image: cylinder12_5kg,
+        description: 'Standard family size trusted by Kenyan households',
+        features: ['Lasts 8-10 weeks', 'Most popular family size', 'Trusted quality'],
+        deliveryAreas: ['Nairobi', 'Nakuru', 'Mombasa', 'Kisumu', 'All major towns']
+      },
+      {
+        id: 9,
+        name: '15kg Gas Cylinder Refill',
+        weight: '15kg',
+        price: 2500,
+        delivery: 'Next Day Delivery',
+        popular: false,
+        image: cylinder15kg,
+        description: 'Large capacity for big families and small businesses',
+        features: ['Lasts 10-12 weeks', 'Commercial grade', 'Extended usage'],
+        deliveryAreas: ['Nairobi', 'All major towns']
+      }
+      
+    ];
     setProducts(greenWellsProducts);
   }, []);
+
+  const handleImageError = (productId) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [productId]: true
+    }));
+  };
+
+  const getFallbackIcon = (productName) => {
+    if (productName.toLowerCase().includes('emergency')) return fallbackImages.emergency;
+    if (productName.toLowerCase().includes('package')) return fallbackImages.package;
+    return fallbackImages.cylinder;
+  };
 
   const addToCart = (product) => {
     const newCart = [...cart, product];
@@ -317,7 +290,7 @@ const Home = () => {
               Safe, reliable gas cylinders delivered to your doorstep across Kenya
             </p>
             
-            <div className="flex flex-wrap justify-center gap-8 mt-8">
+            <div className="flex flex-wrap justify-center gap-8 mt-8 text-black">
               <div className="flex flex-col items-center bg-white bg-opacity-20 p-4 rounded-xl">
                 <span className="text-3xl mb-2">🚚</span>
                 <span className="font-semibold">Same Day Delivery</span>
@@ -365,19 +338,26 @@ const Home = () => {
                 </div>
               )}
 
-              {/* Product Image */}
-             <div className="h-32 mb-4 flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300">
-  <img 
-    src={product.image} 
-    alt={product.name}
-    className="h-full w-auto object-contain"
-    onError={(e) => {
-      e.target.style.display = 'none';
-      e.target.nextSibling.style.display = 'block';
-    }}
-  />
-
-</div>
+              {/* Product Image with Error Handling */}
+              <div className="h-48 mb-4 flex items-center justify-center bg-gray-50 transform group-hover:scale-105 transition-transform duration-300">
+                {imageErrors[product.id] ? (
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="text-6xl text-gray-400 mb-2">
+                      {getFallbackIcon(product.name)}
+                    </div>
+                    <div className="text-sm text-gray-500 text-center px-4">
+                      {product.name}
+                    </div>
+                  </div>
+                ) : (
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="h-full w-auto object-contain max-w-full"
+                    onError={() => handleImageError(product.id)}
+                  />
+                )}
+              </div>
 
               {/* Product Details */}
               <div className="p-6">
@@ -446,6 +426,15 @@ const Home = () => {
             </div>
           ))}
         </div>
+
+        {/* No Results Message */}
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600">Try adjusting your search terms</p>
+          </div>
+        )}
 
         {/* Safety Features */}
         <div className="mt-16 bg-white rounded-2xl shadow-lg p-8 border border-green-200">
