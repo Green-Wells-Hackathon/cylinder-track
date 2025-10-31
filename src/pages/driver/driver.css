@@ -163,11 +163,19 @@
     border: 2px solid rgba(11, 59, 102, 0.3);
 }
 
+.orders-table tbody td:nth-child(2) {
+  padding-left: 12px;
+}
+
 .orders-table tbody td {
     padding: 10px;
     border-bottom: 1px solid #eee;
     font-size: 16px;
     color: #111;
+    box-sizing: border-box;
+    vertical-align: middle;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .orders-history-table tbody td {
@@ -175,6 +183,13 @@
     border-bottom: 1px solid #eee;
     font-size: 16px;
     color: #111;
+}
+
+.orders-table tbody td:first-child {
+  max-width: 160px;             
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .view-btn {
