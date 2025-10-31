@@ -35,6 +35,15 @@ export default function DriverOrders() {
     navigate('/driver/map', { state: { order } });
   }
 
+  function goPrev() {
+    setPage(p => Math.max(1, p - 1));
+  }
+  function goNext() {
+    setPage(p => Math.min(totalPages, p + 1));
+  }
+
+
+
   return (
     <div className="driver-page">
       <aside className="driver-sidebar">
@@ -86,9 +95,27 @@ export default function DriverOrders() {
         </div>
 
         <div className="pagination">
-          <button className="page-btn" onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button>
+          <button
+            className="page-btn"
+            onClick={goPrev}
+            disabled={page === 1}
+            aria-disabled={page === 1}
+            title={page === 1 ? 'No previous page' : 'Previous page'}
+          >
+            Previous
+          </button>
+
           <div className="page-info">Page {page} Of {totalPages}</div>
-          <button className="page-btn" onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</button>
+
+          <button
+            className="page-btn"
+            onClick={goNext}
+            disabled={page === totalPages}
+            aria-disabled={page === totalPages}
+            title={page === totalPages ? 'No next page' : 'Next page'}
+          >
+            Next
+          </button>
         </div>
       </main>
 

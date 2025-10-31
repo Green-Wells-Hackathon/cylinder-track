@@ -17,6 +17,14 @@ export default function DriverHistory() {
     const start = (page - 1) * PAGE_SIZE;
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
+
+    function goPrev() {
+        setPage(p => Math.max(1, p - 1));
+    }
+    function goNext() {
+        setPage(p => Math.min(totalPages, p + 1));
+    }
+
     return (
         <div className="driver-page">
             <aside className="driver-sidebar">
@@ -37,7 +45,7 @@ export default function DriverHistory() {
                     <input value={filter} onChange={e => { setFilter(e.target.value); setPage(1); }} placeholder="Search by order id..." />
                 </div>
 
-                <table className="orders-table">
+                <table className="orders-history-table">
                     <thead>
                         <tr>
                             <th>Order Id</th>
@@ -67,9 +75,27 @@ export default function DriverHistory() {
                 </table>
 
                 <div className="pagination">
-                    <button className="page-btn" onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button>
+                    <button
+                        className="page-btn"
+                        onClick={goPrev}
+                        disabled={page === 1}
+                        aria-disabled={page === 1}
+                        title={page === 1 ? 'No previous page' : 'Previous page'}
+                    >
+                        Previous
+                    </button>
+
                     <div className="page-info">Page {page} Of {totalPages}</div>
-                    <button className="page-btn" onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Next</button>
+
+                    <button
+                        className="page-btn"
+                        onClick={goNext}
+                        disabled={page === totalPages}
+                        aria-disabled={page === totalPages}
+                        title={page === totalPages ? 'No next page' : 'Next page'}
+                    >
+                        Next
+                    </button>
                 </div>
             </main>
         </div>

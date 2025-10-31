@@ -48,7 +48,7 @@
 }
 
 .driver-nav {
-    margin-top: 26px;
+    margin-top: 36px;
     display: flex;
     flex-direction: column;
     gap: 18px;
@@ -62,7 +62,16 @@
     padding: 12px 16px;
     border-radius: 8px;
     text-decoration: none;
-    width: 180px;
+    width: 200px;
+    background: transparent;
+}
+
+
+.driver-nav a svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: white;
 }
 
 .driver-nav a:hover {
@@ -70,34 +79,30 @@
     color: white;
 }
 
-.driver-nav .active {
+.driver-nav a:hover svg {
+    color: white;
+}
+
+.driver-nav a.active {
     background: white;
-    color: var(--deep-blue);
-    border-radius: 8px;
+    color: var(--deep-blue) !important;
 }
-
-.driver-nav a svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  color: white;           
-}
-
-.driver-nav a span {
-  margin-left: 10px;
-  font-size: 18px;
-}
-
-.driver-nav a:hover svg,
-.driver-nav a.active svg,
-.driver-nav a.active,
-.driver-nav a:hover {
-  color: white;
-}
-
 
 .driver-nav a.active svg {
-  color: var(--deep-blue);
+    color: var(--deep-blue) !important;
+}
+
+.driver-nav a.active:hover {
+    background: white;
+    color: var(--deep-blue);
+}
+
+.driver-nav a.active:hover svg {
+    color: var(--deep-blue);
+}
+
+.driver-nav a.active svg {
+    color: var(--deep-blue);
 }
 
 .driver-main {
@@ -150,7 +155,22 @@
 }
 
 
+.orders-history-table thead th {
+    background: rgba(11, 59, 102, 0.12);
+    color: var(--deep-blue);
+    padding: 12px;
+    text-align: left;
+    border: 2px solid rgba(11, 59, 102, 0.3);
+}
+
 .orders-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+    color: #111;
+}
+
+.orders-history-table tbody td {
     padding: 18px;
     border-bottom: 1px solid #eee;
     font-size: 16px;
@@ -200,7 +220,7 @@
     color: var(--deep-blue);
     text-align: center;
     margin: 6px 0 18px;
-    
+
 }
 
 .modal .field {
@@ -251,13 +271,28 @@
 }
 
 .page-btn {
-    background: #0B3B66;
-    border-radius: 10px;
-    padding: 10px 18px;
-    border: none;
-    cursor: pointer;
-    color: white;
-    font-weight: 700;
+  background: var(--deep-blue);
+  border-radius: 10px;
+  padding: 10px 18px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 700;
+  transition: background 120ms ease, color 120ms ease, opacity 120ms ease;
+}
+
+.page-btn:disabled,
+.page-btn.disabled {
+  background: #e0dcd6;       
+  color: #6b6b6b;            
+  cursor: not-allowed;
+  opacity: 0.8;
+  box-shadow: none;
+}
+
+.page-btn:focus {
+  outline: 3px solid rgba(11,59,102,0.15);
+  outline-offset: 2px;
 }
 
 .page-info {
