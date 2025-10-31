@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaShoppingCart, FaHourglassHalf } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
-import ordersSeed from '././ordersData';
 import './driver.css';
+import { getOrdersRealtime } from './ordersService';
 
 const PAGE_SIZE = 9;
 
 export default function DriverOrders() {
-  const [orders, setOrders] = useState([...ordersSeed]);
+  const [orders, setOrders] = useState([]); 
   const [filter, setFilter] = useState('');
   const [page, setPage] = useState(1);
   const [modalOrder, setModalOrder] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsub = getOrdersRealtime(setOrders, { statusArray: ['pending'], orderByField: 'created_at' });
+
+    return () => unsub();
+  }, []);
 
   const filtered = orders.filter(o => o.id.includes(filter));
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -24,25 +30,17 @@ export default function DriverOrders() {
   function closeModal() { setModalOrder(null); }
 
   function handleReject(id) {
-    const remaining = orders.filter(o => o.id !== id);
-    setOrders(remaining);
+    setOrders(prev => prev.filter(o => o.id !== id));
     closeModal();
-    const newFiltered = remaining.filter(o => o.id.includes(filter));
-    const newPages = Math.max(1, Math.ceil(newFiltered.length / PAGE_SIZE));
-    if (page > newPages) setPage(newPages);
+
   }
-  function handleAccept(order) {
+  async function handleAccept(order) {
+
     navigate('/driver/map', { state: { order } });
   }
 
-  function goPrev() {
-    setPage(p => Math.max(1, p - 1));
-  }
-  function goNext() {
-    setPage(p => Math.min(totalPages, p + 1));
-  }
-
-
+  function goPrev() { setPage(p => Math.max(1, p - 1)); }
+  function goNext() { setPage(p => Math.min(totalPages, p + 1)); }
 
   return (
     <div className="driver-page">
@@ -95,27 +93,9 @@ export default function DriverOrders() {
         </div>
 
         <div className="pagination">
-          <button
-            className="page-btn"
-            onClick={goPrev}
-            disabled={page === 1}
-            aria-disabled={page === 1}
-            title={page === 1 ? 'No previous page' : 'Previous page'}
-          >
-            Previous
-          </button>
-
+          <button className="page-btn" onClick={goPrev} disabled={page === 1} aria-disabled={page === 1} title={page === 1 ? 'No previous page' : 'Previous page'}>Previous</button>
           <div className="page-info">Page {page} Of {totalPages}</div>
-
-          <button
-            className="page-btn"
-            onClick={goNext}
-            disabled={page === totalPages}
-            aria-disabled={page === totalPages}
-            title={page === totalPages ? 'No next page' : 'Next page'}
-          >
-            Next
-          </button>
+          <button className="page-btn" onClick={goNext} disabled={page === totalPages} aria-disabled={page === totalPages} title={page === totalPages ? 'No next page' : 'Next page'}>Next</button>
         </div>
       </main>
 
@@ -131,7 +111,7 @@ export default function DriverOrders() {
             <div className="field"><strong>Buyer:</strong> <span style={{ fontWeight: 600, fontSize: 22 }}>{modalOrder.buyer}</span></div>
             <div className="field"><strong>No. of Gases:</strong> <span style={{ fontWeight: 600, fontSize: 22 }}>{modalOrder.gases}</span></div>
             <div className="field"><strong>Location:</strong> <span style={{ fontWeight: 600, fontSize: 22 }}>{modalOrder.location}</span></div>
-            <div className="field"><strong>Status:</strong> <span className="status-pending">{modalOrder.status}</span></div>
+            <div className="field"><strong>Status:</strong> <span className={modalOrder.status.toLowerCase() === 'pending' ? 'status-pending' : 'status-delivered'}>{modalOrder.status}</span></div>
 
             <div className="modal-buttons">
               <button className="btn-reject" onClick={() => handleReject(modalOrder.id)}>✖ Reject</button>
