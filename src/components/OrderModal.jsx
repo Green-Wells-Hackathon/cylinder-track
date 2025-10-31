@@ -77,7 +77,7 @@ function OrderModal({ order, onClose, onViewMap }) {
           </div>
 
           {/* Action Button */}
-          {order.status === "pending" && ( // <-- CORRECTED
+          {order.status == "pending" && ( // <-- CORRECTED
             <button
               className="w-full bg-indigo-600 mt-5 text-white py-2 rounded-md hover:bg-indigo-700"
               onClick={handleAssignClick} 
