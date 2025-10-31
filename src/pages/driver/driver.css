@@ -1,0 +1,277 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+
+:root {
+    --primary-green: #2F9E44;
+    --deep-blue: #0B3B66;
+    --warm-yellow: #FFB020;
+    --status-delivered: #2F9E44;
+    --status-pending: #FFB020;
+}
+
+.driver-page {
+    display: flex;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    box-sizing: border-box;
+}
+
+.driver-sidebar {
+    width: 260px;
+    background: var(--primary-green);
+    color: white;
+    padding: 28px 18px;
+    box-sizing: border-box;
+}
+
+.driver-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.driver-logo img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: white;
+    padding: 6px;
+}
+
+.driver-logo h1 {
+    font-size: 28px;
+    margin: 0;
+    color: var(--deep-blue);
+    font-weight: 700;
+}
+
+.driver-nav {
+    margin-top: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.driver-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    width: 180px;
+}
+
+.driver-nav a:hover {
+    background: var(--deep-blue);
+    color: white;
+}
+
+.driver-nav .active {
+    background: white;
+    color: var(--deep-blue);
+    border-radius: 8px;
+}
+
+.driver-nav a svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: white;           
+}
+
+.driver-nav a span {
+  margin-left: 10px;
+  font-size: 18px;
+}
+
+.driver-nav a:hover svg,
+.driver-nav a.active svg,
+.driver-nav a.active,
+.driver-nav a:hover {
+  color: white;
+}
+
+
+.driver-nav a.active svg {
+  color: var(--deep-blue);
+}
+
+.driver-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 48px;
+    background: #f7f7f7;
+}
+
+.page-title {
+    font-size: 34px;
+    color: var(--deep-blue);
+    margin-bottom: 12px;
+    font-weight: 800;
+}
+
+.table-wrapper {
+    background: white;
+    border-radius: 6px;
+    padding: 8px 14px;
+    box-shadow: none;
+    margin-top: 10px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.search-box input {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 2px solid var(--deep-blue);
+    width: 280px;
+    font-size: 16px;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.orders-table thead th {
+    background: rgba(11, 59, 102, 0.12);
+    color: var(--deep-blue);
+    padding: 12px;
+    text-align: left;
+    border: 2px solid rgba(11, 59, 102, 0.3);
+}
+
+
+.orders-table tbody td {
+    padding: 18px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+    color: #111;
+}
+
+.view-btn {
+    background: var(--deep-blue);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.status-pending {
+    color: var(--warm-yellow);
+    font-weight: 500;
+}
+
+.status-delivered {
+    color: var(--status-delivered);
+    font-weight: 500;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.modal {
+    background: white;
+    width: 640px;
+    padding: 28px;
+    border-radius: 6px;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.25);
+    text-align: left;
+}
+
+.modal h2 {
+    font-size: 36px;
+    color: var(--deep-blue);
+    text-align: center;
+    margin: 6px 0 18px;
+    
+}
+
+.modal .field {
+    font-size: 22px;
+    margin: 10px 0;
+    color: var(--deep-blue);
+
+}
+
+.modal .field strong {
+    font-weight: 800;
+    margin-right: 6px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.btn-reject {
+    background: #c81010;
+    color: white;
+    padding: 12px 62px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.btn-accept {
+    background: var(--primary-green);
+    color: white;
+    padding: 12px 62px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.page-btn {
+    background: #0B3B66;
+    border-radius: 10px;
+    padding: 10px 18px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-weight: 700;
+}
+
+.page-info {
+    color: var(--deep-blue);
+    font-weight: 800;
+}
+
+.map-card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.leaflet-container {
+    height: 740px;
+    border-radius: 10px;
+}
