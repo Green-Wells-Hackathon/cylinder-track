@@ -65,7 +65,7 @@ function Login() {
 
         // Redirect based on role
         if (activeRole === "customer") navigate("/home");
-        else if (activeRole === "driver") navigate("/driver");
+        else if (activeRole === "driver") navigate("/driver/orders");
         else if (activeRole === "admin") navigate("/dashboard");
       }
     } catch (error) {
