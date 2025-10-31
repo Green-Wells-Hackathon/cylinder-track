@@ -11,9 +11,8 @@ function App() {
         { index: true, Component: lazy(() => import('./pages/Login')) },
         { path: 'home', Component: lazy(() => import('./pages/customer/Home')) },
         { path: 'checkout', Component: lazy(() => import('./pages/customer/Checkout')) },
-        {path: 'safety', Component: lazy(() => import('./components/NotFoundPage'))},
-
-
+        { path: 'safety', Component: lazy(() => import('./pages/safety/SafetyDashboard.jsx')) },
+        
         {
           path: 'dashboard',
           Component: lazy(() => import('./pages/admin/Layout')),
