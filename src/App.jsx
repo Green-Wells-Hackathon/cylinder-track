@@ -22,7 +22,7 @@ function App() {
         },
 
         {
-          path: 'driver',
+          path: 'driver/',
           children: [
             { index: true, Component: lazy(() => import('./pages/driver/DriverDashboard')) },
             { path: 'orders', Component: lazy(() => import('./pages/driver/DriverOrders')) }, 
